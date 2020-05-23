@@ -58,9 +58,31 @@ class board:
                 newPiece.setWidth(3)
                 newPiece.draw(self.win)
 
+    def makeMove(self, L1, L2, player):
+        #corner cases
+        if player <= 0 or player > 2:
+            raise Exception(str(player) + ' is an invalid player')
+        elif L1.x < 0 or L1.x >= self.boardWidth or L1.y < 0 or L1.y >= self.boardHeight or self.pieces[L1.x][L1.y] != player:
+                raise Exception('invalid starting location: ' + str(L1))
+        elif L2.x < 0 or L2.x >= self.boardWidth or L2.y < 0 or L2.y >= self.boardHeight or self.pieces[L2.x][L2.y] != 0:
+                raise Exception('invalid ending location: ' + str(L1))
+        else: #move is okay
+            #update internal pieces
+            self.pieces[L1.x][L1.y] = 0
+            self.pieces[L2.x][L2.y] = player
 
-    def makeMove(self, L1, L2):
-        return True
+            #cover up where the piece was
+            top = Point(L1.x * self.squareSize, L1.y * self.squareSize + self.textHeight)
+            bot = Point((L1.x + 1) * self.squareSize, (L1.y + 1) * self.squareSize + self.textHeight)
+            temp = Rectangle(top,bot)
+            temp.setFill(squareColors[1 if (L1.x + L1.y) % 2 == 1 else 0]) #to keep color alternation
+            temp.draw(self.win)
+
+            #add the piece in its new location
+            newPiece = Circle(Point((0.5 + L2.x) * self.squareSize, (0.5 + L2.y) * self.squareSize + self.textHeight), self.squareSize * 2 / 5)
+            newPiece.setFill(pieceColors[player])
+            newPiece.setWidth(3)
+            newPiece.draw(self.win)
 
     def clearBoard(self):
         #intialize array to all zeros
@@ -86,17 +108,24 @@ class board:
     def close(self):
         self.win.close()
 
-    #def __getitem__(self, index):
-        
-    #def __setitme__(self, index, newVal):
+    def get(self, L):
+        if L.x < 0 or L.x >= self.boardWidth or L.y < 0 or L.y >= self.boardHeight:
+            raise Exception('invalid location: ' + str(L))
+        return self.pieces[L.x][L.y]   
 
 def main():
     myBoard = board("test")
-    #myBoard.playersInit([Location(1,2),Location(50000000,3)], [Location(0,0)]) #Location out of bounds
-    #myBoard.playersInit([(1,2),(5,3)], [(0,0)]) #using tuples
     p1sPieces = [Location(0,0),Location(0,2),Location(1,1),Location(2,0)]
     p2sPieces = [Location(7,7),Location(7,5),Location(6,6),Location(5,7)]
     myBoard.playersInit(p1sPieces, p2sPieces)
+
+    #print(myBoard[0][0])
+    time.sleep(1)
+    myBoard.makeMove(p1sPieces[0], Location(0,1),1)
+
+    print(myBoard.get(Location(0,0)))
+
+
     time.sleep(4)
     myBoard.close()
 
