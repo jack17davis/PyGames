@@ -1,6 +1,12 @@
 from graphics import *
 import time
 
+class Location:
+    x, y = 0,0
+
+    def __init__(self,x,y):
+        self.x = x
+        self.y = y
 
 class board:
     
@@ -20,9 +26,9 @@ class board:
         self.textHeight = squareSize/2
         self.win = GraphWin(name, boardWidth * squareSize, self.textHeight + boardHeight * squareSize)
         self.win.setBackground("black")
-        self.boardInit()
+        self._boardInit()
 
-    def boardInit(self):
+    def _boardInit(self):
         flip = 1
         for i in range (0, self.boardWidth): #for every square
             if self.boardHeight %2 == 0:
@@ -37,6 +43,14 @@ class board:
                 #time.sleep(1)
 
 
+    def getClickedSquare(self):
+        while True:
+            clickPos = self.win.getMouse()
+            squareX = int(clickPos.x / self.squareSize)
+            squareY = int((clickPos.y - self.textHeight) / self.squareSize)
+            if squareX >= 0 and squareX < self.boardWidth and squareY >= 0 and squareY < self.boardHeight:
+                return Location(squareX, squareY)
+
     def close(self):
         self.win.close()
 
@@ -50,10 +64,3 @@ if __name__ == "__main__":
 
 
 
-def getClickedSquare():
-    while True:
-        clickPos = win.getMouse()
-        squareX = int(clickPos.x / squareSize)
-        squareY = int((clickPos.y - textHeight) / squareSize)
-        if squareX >= 0 and squareX < boardWidth and squareY >= 0 and squareY < boardHeight:
-            return (squareX, squareY)
