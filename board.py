@@ -152,7 +152,6 @@ def main():
 
     time.sleep(1)
     myBoard.makeMove(1,p1sPieces[0], Location(0,1))
-
     myBoard.makeMove(2,myBoard.getClickedSquare(),myBoard.getClickedSquare())
 
     print(myBoard)
@@ -164,6 +163,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
