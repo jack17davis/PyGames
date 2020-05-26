@@ -1,6 +1,4 @@
-# PyGames
-A collection of chess and checkers style games.
+# PyGames - Started 5/22/20
 
-Jack Davis
-Started 5/22/20
-
+Still under construction
+![construction](https://user-images.githubusercontent.com/56771141/82771453-21abf300-9e0a-11ea-96d4-233fc174f866.jpg)
