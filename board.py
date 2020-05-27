@@ -8,6 +8,16 @@ class Location:
     def __init__(self,x,y):
         self.x = x
         self.y = y
+
+    def __eq__(self, other):
+        #print(str(self) + "Location Equals? " + str(other))
+        if other == None:
+            return False
+        return self.x == other.x and self.y == other.y
+
+    def __ne__(self, other):
+        return not self == other
+
     def __str__(self):
         return "(" + str(self.x) + "," + str(self.y) + ")"
 
@@ -127,11 +137,11 @@ class board:
                 return Location(squareX, squareY)
 
     #highlights a square
-    def select(self,player, L):
+    def select(self, L):
         if L.x < 0 or L.x >= self.boardWidth or L.y < 0 or L.y >= self.boardHeight:
             raise Exception('invalid location: ' + str(L))
-        elif self.pieces[L.x][L.y] != player or player == 0:
-            raise Exception('Player ' + str(player) + " is not allowed to move the piece at " + str(L) + ". That piece is owned by player " + str(self.pieces[L.x][L.y]))
+        elif self.pieces[L.x][L.y] != 1 and self.pieces[L.x][L.y] != 2:
+            raise Exception('No piece at' + str(L))
         #draw a highlighted background
         top = Point(L.x * self.squareSize, L.y * self.squareSize + self.textHeight)
         bot = Point((L.x + 1) * self.squareSize, (L.y + 1) * self.squareSize + self.textHeight)
@@ -141,7 +151,7 @@ class board:
 
         #redraw the player
         newPiece = Circle(Point((0.5 + L.x) * self.squareSize, (0.5 + L.y) * self.squareSize + self.textHeight), self.squareSize * 2 / 5)
-        newPiece.setFill(pieceColors[player])
+        newPiece.setFill(pieceColors[self.pieces[L.x][L.y]])
         newPiece.setWidth(3)
         newPiece.draw(self.win)
 
@@ -188,6 +198,12 @@ def main():
     p2sPieces = [Location(7,7),Location(7,5),Location(6,6),Location(5,7)]
     myBoard.playersInit(p1sPieces, p2sPieces)
 
+
+    print(str(Location(1,2) == Location(1,2)))
+    print(str(Location(1,3) != Location(1,2)))
+    print(str(Location(1,6) == Location(1,2)))
+    print(str(Location(1,2) != Location(1,2)))  
+
     time.sleep(1)
     myBoard.makeMove(1,p1sPieces[0], Location(0,1))
     myBoard.makeMove(2,p2sPieces[3], Location(6,5))
@@ -195,10 +211,10 @@ def main():
 
     print(myBoard)
 
-    myBoard.select(1, Location(0,2))
-    myBoard.select(1, Location(0,1))
-    myBoard.select(2, Location(6,5))
-    myBoard.select(2, Location(7,7))
+    myBoard.select(Location(0,2))
+    myBoard.select(Location(0,1))
+    myBoard.select(Location(6,5))
+    myBoard.select(Location(7,7))
 
     time.sleep(10)
     myBoard.deselect(Location(0,2))
