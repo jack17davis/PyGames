@@ -172,6 +172,19 @@ class board:
         newPiece.setWidth(3)
         newPiece.draw(self.win)
 
+    def removePiece(self, L):
+        if self.get(L) == 0:
+            return
+        else:
+            #cover up where the piece was
+            top = Point(L.x * self.squareSize, L.y * self.squareSize + self.textHeight)
+            bot = Point((L.x + 1) * self.squareSize, (L.y + 1) * self.squareSize + self.textHeight)
+            temp = Rectangle(top,bot)
+            temp.setFill(squareColors[1 if (L.x + L.y) % 2 == 1 else 0]) #to keep color alternation
+            temp.draw(self.win)
+            self.pieces[L.x][L.y] = 0
+            return
+
     #close the board
     def close(self):
         self.win.close()
