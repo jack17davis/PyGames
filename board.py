@@ -1,7 +1,7 @@
 from graphics import *
 import time
 
-pieceColors = [color_rgb(127,127,127),color_rgb(50, 50, 250), color_rgb(230, 50, 50)]
+pieceColors = [color_rgb(240 ,240,0),color_rgb(50, 50, 250), color_rgb(230, 50, 50)]
 squareColors = [color_rgb(127, 0, 0), color_rgb(255, 255, 255)]
 
 class Location:
@@ -78,10 +78,12 @@ class board:
         #corner cases
         if player <= 0 or player > 2:
             raise Exception(str(player) + ' is an invalid player')
-        elif L1.x < 0 or L1.x >= self.boardWidth or L1.y < 0 or L1.y >= self.boardHeight or self.pieces[L1.x][L1.y] != player:
-                raise Exception('invalid starting location: ' + str(L1))
+        elif L1.x < 0 or L1.x >= self.boardWidth or L1.y < 0 or L1.y >= self.boardHeight:
+            raise Exception('invalid starting location: ' + str(L1))
+        elif self.pieces[L1.x][L1.y] != player:
+            raise Exception('Player ' + str(player) + " is not allowed to move the piece at " + str(L1) + ". It is owned by player "+ str(self.pieces[L1.x][L1.y]))
         elif L2.x < 0 or L2.x >= self.boardWidth or L2.y < 0 or L2.y >= self.boardHeight or self.pieces[L2.x][L2.y] != 0:
-                raise Exception('invalid ending location: ' + str(L1))
+            raise Exception('invalid ending location: ' + str(L1))
         else: #move is okay
             #update internal pieces
             self.pieces[L1.x][L1.y] = 0
@@ -124,6 +126,42 @@ class board:
             if squareX >= 0 and squareX < self.boardWidth and squareY >= 0 and squareY < self.boardHeight:
                 return Location(squareX, squareY)
 
+    #highlights a square
+    def select(self,player, L):
+        if L.x < 0 or L.x >= self.boardWidth or L.y < 0 or L.y >= self.boardHeight:
+            raise Exception('invalid location: ' + str(L))
+        elif self.pieces[L.x][L.y] != player or player == 0:
+            raise Exception('Player ' + str(player) + " is not allowed to move the piece at " + str(L) + ". That piece is owned by player " + str(self.pieces[L.x][L.y]))
+        #draw a highlighted background
+        top = Point(L.x * self.squareSize, L.y * self.squareSize + self.textHeight)
+        bot = Point((L.x + 1) * self.squareSize, (L.y + 1) * self.squareSize + self.textHeight)
+        temp = Rectangle(top,bot)
+        temp.setFill(pieceColors[0])
+        temp.draw(self.win)
+
+        #redraw the player
+        newPiece = Circle(Point((0.5 + L.x) * self.squareSize, (0.5 + L.y) * self.squareSize + self.textHeight), self.squareSize * 2 / 5)
+        newPiece.setFill(pieceColors[player])
+        newPiece.setWidth(3)
+        newPiece.draw(self.win)
+
+    #redraws a square (even if the given square isn't selected)
+    def deselect(self, L):
+        if L.x < 0 or L.x >= self.boardWidth or L.y < 0 or L.y >= self.boardHeight:
+                raise Exception('invalid location: ' + str(L))
+        #recolor the background
+        top = Point(L.x * self.squareSize, L.y * self.squareSize + self.textHeight)
+        bot = Point((L.x + 1) * self.squareSize, (L.y + 1) * self.squareSize + self.textHeight)
+        temp = Rectangle(top,bot)
+        temp.setFill(squareColors[1 if (L.x + L.y) % 2 == 1 else 0])
+        temp.draw(self.win)
+
+        #redraw the player
+        newPiece = Circle(Point((0.5 + L.x) * self.squareSize, (0.5 + L.y) * self.squareSize + self.textHeight), self.squareSize * 2 / 5)
+        newPiece.setFill(pieceColors[self.pieces[L.x][L.y]])
+        newPiece.setWidth(3)
+        newPiece.draw(self.win)
+
     #close the board
     def close(self):
         self.win.close()
@@ -152,11 +190,22 @@ def main():
 
     time.sleep(1)
     myBoard.makeMove(1,p1sPieces[0], Location(0,1))
-    myBoard.makeMove(2,myBoard.getClickedSquare(),myBoard.getClickedSquare())
+    myBoard.makeMove(2,p2sPieces[3], Location(6,5))
+    #myBoard.makeMove(2,myBoard.getClickedSquare(),myBoard.getClickedSquare())
 
     print(myBoard)
 
-    time.sleep(4)
+    myBoard.select(1, Location(0,2))
+    myBoard.select(1, Location(0,1))
+    myBoard.select(2, Location(6,5))
+    myBoard.select(2, Location(7,7))
+
+    time.sleep(10)
+    myBoard.deselect(Location(0,2))
+    myBoard.deselect(Location(0,1))
+    myBoard.deselect(Location(6,5))
+    myBoard.deselect(Location(7,7))
+
     myBoard.setText("It worked!!")
     time.sleep(1)
     myBoard.close()

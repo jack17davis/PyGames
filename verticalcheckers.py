@@ -13,7 +13,8 @@ def verticalcheckers(playercode):
     time.sleep(4)
     brd.close()
 
-def humanTurn(playerToMove, )
+def humanTurn(playerToMove):
+    
 
 
 
