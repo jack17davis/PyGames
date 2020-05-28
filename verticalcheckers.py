@@ -1,12 +1,16 @@
 from board import *
+from datetime import datetime
 import time
+import importlib
 
 boardWidth = 6
 boardHeight = 6
+timeLimit = 3.0
 
-def verticalcheckers(playercode, boardSize = 6):
+def verticalcheckers(playercode, boardSize = 6, p1file = "default_player", p2file = "default_player"):
     if playercode == 0: #0 = quit
         return
+
     #initialize the game
     text = "Player 1 = 0\t Player 2 = 0"
     scores = [0, 0, 0]
@@ -20,10 +24,7 @@ def verticalcheckers(playercode, boardSize = 6):
             p1sPieces.append(Location(x,y))
             p2sPieces.append(Location(x,boardHeight-y-1))
             scores[0] += 1 #score[0] is our max score
-
     brd.playersInit(p1sPieces, p2sPieces)
-    
-
     player = 1 #player 1 starts first
 
     if playercode == 1: #human vs human
@@ -35,10 +36,42 @@ def verticalcheckers(playercode, boardSize = 6):
             player = 2 - player + 1 #switch turns
     
     if playercode == 2: #human vs computer
-        brd.close()
-        return 1
+        while True:
+            _humanTurn(brd, player)
+
+            #update board and switch turns
+            text = _updateText(brd, text, scores)
+            if len(text) < 3:
+                return int(text) #let the caller know who won for score keeping purposes
+            player = 2 - player + 1 #switch turns
+
+            _computerTurn(brd,player)
+
+            #update board and switch turns
+            text = _updateText(brd, text, scores)
+            if len(text) < 3:
+                return int(text) #let the caller know who won for score keeping purposes
+            player = 2 - player + 1 #switch turns
     
-    if playercode == 3: #user's file vs computer
+    if playercode == 3: #computer vs computer
+
+        while True:
+            _computerTurn(brd, player, p1file)
+
+            #update board and switch turns
+            text = _updateText(brd, text, scores)
+            if len(text) < 3:
+                return int(text) #let the caller know who won for score keeping purposes
+            player = 2 - player + 1 #switch turns
+
+            _computerTurn(brd,player, p2file)
+
+            #update board and switch turns
+            text = _updateText(brd, text, scores)
+            if len(text) < 3:
+                return int(text) #let the caller know who won for score keeping purposes
+            player = 2 - player + 1 #switch turns
+        
         brd.close()
         return 1
 
@@ -74,7 +107,9 @@ def _updateText(brd,text,scores):
 
 #checks whether a given player's move is valid or not          
 def _isvalid(brd, playerToMove, Lstart, Lend):
-    if playerToMove != brd.get(Lstart) or Lstart == Lend or brd.get(Lend) != 0: #does the move logically make sense
+    if (Lstart.x < 0 or Lstart.x >= brd.boardWidth or Lstart.y < 0 or Lstart.y >= brd.boardHeight or #make sure Lstart is in bounds
+    Lend.x < 0 or Lend.x >= brd.boardWidth or Lend.y < 0 or Lend.y >= brd.boardHeight or #make sure Lend is in bounds
+    playerToMove != brd.get(Lstart) or Lstart == Lend or brd.get(Lend) != 0):
         return False
 
     #list of potential valid moves
@@ -102,6 +137,44 @@ def _isvalid(brd, playerToMove, Lstart, Lend):
     #this move isn't a valid move
     return False
 
+#opens a file and calls getMove() on the file
+#then makes the move returned if it is legal otherwise a default move
+def _computerTurn(brd, playerToMove, filename = "default_player"):
+    player = importlib.import_module(filename)
+    startTime = datetime.now() #start a timer
+    attemptedMove = player.getMove(brd, player, timeLimit)
+    duration = datetime.now() - startTime #end the timer
+
+    #check time
+    if duration.seconds + duration.microseconds * 1e-6 >= timeLimit + 0.2:
+        print("Time violation by player " + str(playerToMove))
+        _makeDefaultMove(brd, playerToMove)
+        return
+    
+    #check validity of move
+    if _isvalid(brd, playerToMove, attemptedMove[0], attemptedMove[1]): #the computer's move is acceptable
+        brd.makeMove(playerToMove, attemptedMove[0], attemptedMove[1])
+        return
+    else:
+        print("Move violation by player " + str(playerToMove))
+        _makeDefaultMove(brd, playerToMove)
+        return
+
+#returns the first legal move it finds
+#note: as implemented currently it does not look for a jump
+def _makeDefaultMove(brd, playerToMove):
+    directions = [[1,0,], [-1,0], [0,1], [0,-1]]
+    for i in range (brd.boardWidth):
+        for j in range (brd.boardHeight):
+            if playerToMove == brd.get(Location(i,j)): #check every location on the board for a piece that this player owns
+                for direction in directions: #when we find one, find a direction it can move
+                    if _isvalid(brd,playerToMove, Location(i, j), Location(i + direction[0], j + direction[1])):
+                        brd.makeMove(playerToMove, Location(i, j), Location(i + direction[0], j + direction[1]))
+                        return
+    #no possible move was found
+    print("Error: _makeDefaultMove couldn't find any possible moves!!!") #hopefully this never happens
+    return
+
 #reads and interprets user's mouse input
 def _humanTurn(brd, playerToMove):
     startSelected = False
@@ -124,4 +197,4 @@ def _humanTurn(brd, playerToMove):
     brd.makeMove(playerToMove, start, click)
 
 if __name__ == "__main__":
-    verticalcheckers(1,6)
+    verticalcheckers(3,6)
