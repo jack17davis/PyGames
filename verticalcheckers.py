@@ -25,7 +25,7 @@ def verticalcheckers(playercode, boardSize = 6, p1file = "default_player", p2fil
             p2sPieces.append(Location(x,boardHeight-y-1))
             scores[0] += 1 #score[0] is our max score
     brd.playersInit(p1sPieces, p2sPieces)
-    player = 1 #player 1 starts first
+    player = 2 #player 1 starts first
 
     if playercode == 1: #human vs human
         while True:
@@ -64,7 +64,7 @@ def verticalcheckers(playercode, boardSize = 6, p1file = "default_player", p2fil
                 return int(text) #let the caller know who won for score keeping purposes
             player = 2 - player + 1 #switch turns
 
-            _computerTurn(brd,player, p2file)
+            _computerTurn(brd, player, p2file)
 
             #update board and switch turns
             text = _updateText(brd, text, scores)
@@ -142,22 +142,25 @@ def _isvalid(brd, playerToMove, Lstart, Lend):
 def _computerTurn(brd, playerToMove, filename = "default_player"):
     player = importlib.import_module(filename)
     startTime = datetime.now() #start a timer
-    attemptedMove = player.getMove(brd, player, timeLimit)
+    (x,y) = player.getMove(brd, playerToMove, timeLimit)
     duration = datetime.now() - startTime #end the timer
 
     #check time
     if duration.seconds + duration.microseconds * 1e-6 >= timeLimit + 0.2:
         print("Time violation by player " + str(playerToMove))
         _makeDefaultMove(brd, playerToMove)
+        time.sleep(0.22) #slight delay for better visuals
         return
     
     #check validity of move
-    if _isvalid(brd, playerToMove, attemptedMove[0], attemptedMove[1]): #the computer's move is acceptable
-        brd.makeMove(playerToMove, attemptedMove[0], attemptedMove[1])
+    if _isvalid(brd, playerToMove, x, y): #the computer's move is acceptable
+        brd.makeMove(playerToMove, x, y)
+        time.sleep(0.22) #slight delay for better visuals
         return
     else:
         print("Move violation by player " + str(playerToMove))
         _makeDefaultMove(brd, playerToMove)
+        time.sleep(0.22) #slight delay for better visuals
         return
 
 #returns the first legal move it finds
@@ -182,6 +185,7 @@ def _humanTurn(brd, playerToMove):
 
     while True: #loop infinitely until the user makes an acceptable move
         click = brd.getClickedSquare()
+        print("[Human Player] Selected Location: " + str(click))
         if startSelected: #we have a complete move
             if _isvalid(brd, playerToMove, start, click):
                 break # we now have an acceptable move
@@ -195,6 +199,7 @@ def _humanTurn(brd, playerToMove):
             start = click
             startSelected = True
     brd.makeMove(playerToMove, start, click)
+    time.sleep(0.22) #slight delay for better visuals
 
 if __name__ == "__main__":
     verticalcheckers(3,6)

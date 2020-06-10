@@ -18,20 +18,25 @@ class Location:
     def __ne__(self, other):
         return not self == other
 
+    def distTo(self,other):
+        return abs(self.x - other.x) + abs(self.y - other.y)
+
     def __str__(self):
         return "(" + str(self.x) + "," + str(self.y) + ")"
 
 class board:
     
     #Initializes board object
-    def __init__(self, name, startingText = "", boardWidth = 8, boardHeight = 8, squareSize = 75):
+    def __init__(self, name, startingText = "", boardWidth = 8, boardHeight = 8, squareSize = 75, visible = True):
+        self.visible = visible
         self.boardWidth = boardWidth
         self.boardHeight = boardHeight
         self.squareSize = squareSize
         self.textHeight = squareSize/2
-        self.win = GraphWin(name, boardWidth * squareSize, self.textHeight + boardHeight * squareSize)
-        self._textInit(startingText)
-        self._boardInit()
+        if self.visible:
+            self.win = GraphWin(name, boardWidth * squareSize, self.textHeight + boardHeight * squareSize)
+            self._textInit(startingText)
+            self._boardInit()
 
     def _textInit(self, startingText):
         self.text = Text(Point(self.boardWidth * self.squareSize / 2, self.textHeight / 2), startingText)
@@ -63,11 +68,12 @@ class board:
                 raise Exception('At least two pieces at: ' + str(piece))
             else:
                 #player 1 has a piece here so draw it
-                self.pieces[piece.x][piece.y] = 1 
-                newPiece = Circle(Point((0.5 + piece.x) * self.squareSize, (0.5 + piece.y) * self.squareSize + self.textHeight), self.squareSize * 2 / 5)
-                newPiece.setFill(pieceColors[1])
-                newPiece.setWidth(3)
-                newPiece.draw(self.win)
+                self.pieces[piece.x][piece.y] = 1
+                if self.visible:
+                    newPiece = Circle(Point((0.5 + piece.x) * self.squareSize, (0.5 + piece.y) * self.squareSize + self.textHeight), self.squareSize * 2 / 5)
+                    newPiece.setFill(pieceColors[1])
+                    newPiece.setWidth(3)
+                    newPiece.draw(self.win)
 
         #add all of player two's pieces to the board
         for piece in p2sPieces:
@@ -78,10 +84,11 @@ class board:
             else:
                 #player 1 has a piece here so draw it
                 self.pieces[piece.x][piece.y] = 2
-                newPiece = Circle(Point((0.5 + piece.x) * self.squareSize, (0.5 + piece.y) * self.squareSize + self.textHeight), self.squareSize * 2 / 5)
-                newPiece.setFill(pieceColors[2])
-                newPiece.setWidth(3)
-                newPiece.draw(self.win)
+                if self.visible:
+                    newPiece = Circle(Point((0.5 + piece.x) * self.squareSize, (0.5 + piece.y) * self.squareSize + self.textHeight), self.squareSize * 2 / 5)
+                    newPiece.setFill(pieceColors[2])
+                    newPiece.setWidth(3)
+                    newPiece.draw(self.win)
 
     # given player attempts to make a move from location L1 to location L2
     def makeMove(self, player, L1, L2):
@@ -99,18 +106,20 @@ class board:
             self.pieces[L1.x][L1.y] = 0
             self.pieces[L2.x][L2.y] = player
 
-            #cover up where the piece was
-            top = Point(L1.x * self.squareSize, L1.y * self.squareSize + self.textHeight)
-            bot = Point((L1.x + 1) * self.squareSize, (L1.y + 1) * self.squareSize + self.textHeight)
-            temp = Rectangle(top,bot)
-            temp.setFill(squareColors[1 if (L1.x + L1.y) % 2 == 1 else 0]) #to keep color alternation
-            temp.draw(self.win)
+            if self.visible:
 
-            #add the piece in its new location
-            newPiece = Circle(Point((0.5 + L2.x) * self.squareSize, (0.5 + L2.y) * self.squareSize + self.textHeight), self.squareSize * 2 / 5)
-            newPiece.setFill(pieceColors[player])
-            newPiece.setWidth(3)
-            newPiece.draw(self.win)
+                #cover up where the piece was
+                top = Point(L1.x * self.squareSize, L1.y * self.squareSize + self.textHeight)
+                bot = Point((L1.x + 1) * self.squareSize, (L1.y + 1) * self.squareSize + self.textHeight)
+                temp = Rectangle(top,bot)
+                temp.setFill(squareColors[1 if (L1.x + L1.y) % 2 == 1 else 0]) #to keep color alternation
+                temp.draw(self.win)
+
+                #add the piece in its new location
+                newPiece = Circle(Point((0.5 + L2.x) * self.squareSize, (0.5 + L2.y) * self.squareSize + self.textHeight), self.squareSize * 2 / 5)
+                newPiece.setFill(pieceColors[player])
+                newPiece.setWidth(3)
+                newPiece.draw(self.win)
 
     #clear board of all players
     def clearBoard(self):
@@ -125,85 +134,110 @@ class board:
 
     #set text at the top of the board
     def setText(self,text):
-        self.text.setText(text)
+        if self.visible:
+            self.text.setText(text)
 
     #returns the location object of the tile the user has clicked on
     def getClickedSquare(self):
-        while True: #wait until the user clicks
-            clickPos = self.win.getMouse()
-            squareX = int(clickPos.x / self.squareSize)
-            squareY = int((clickPos.y - self.textHeight) / self.squareSize)
-            if squareX >= 0 and squareX < self.boardWidth and squareY >= 0 and squareY < self.boardHeight:
-                return Location(squareX, squareY)
+        if not self.visible:
+            return
+        else:
+            while True: #wait until the user clicks
+                clickPos = self.win.getMouse()
+                squareX = int(clickPos.x / self.squareSize)
+                squareY = int((clickPos.y - self.textHeight) / self.squareSize)
+                if squareX >= 0 and squareX < self.boardWidth and squareY >= 0 and squareY < self.boardHeight:
+                    return Location(squareX, squareY)
 
     #highlights a square
     def select(self, L):
-        if L.x < 0 or L.x >= self.boardWidth or L.y < 0 or L.y >= self.boardHeight:
-            raise Exception('invalid location: ' + str(L))
-        elif self.pieces[L.x][L.y] != 1 and self.pieces[L.x][L.y] != 2:
-            raise Exception('No piece at' + str(L))
-        #draw a highlighted background
-        top = Point(L.x * self.squareSize, L.y * self.squareSize + self.textHeight)
-        bot = Point((L.x + 1) * self.squareSize, (L.y + 1) * self.squareSize + self.textHeight)
-        temp = Rectangle(top,bot)
-        temp.setFill(pieceColors[0])
-        temp.draw(self.win)
 
-        #redraw the player
-        newPiece = Circle(Point((0.5 + L.x) * self.squareSize, (0.5 + L.y) * self.squareSize + self.textHeight), self.squareSize * 2 / 5)
-        newPiece.setFill(pieceColors[self.pieces[L.x][L.y]])
-        newPiece.setWidth(3)
-        newPiece.draw(self.win)
+        if not self.visible:
+            return
+        else:
+            if L.x < 0 or L.x >= self.boardWidth or L.y < 0 or L.y >= self.boardHeight:
+                raise Exception('invalid location: ' + str(L))
+            elif self.pieces[L.x][L.y] != 1 and self.pieces[L.x][L.y] != 2:
+                raise Exception('No piece at' + str(L))
+            #draw a highlighted background
+            top = Point(L.x * self.squareSize, L.y * self.squareSize + self.textHeight)
+            bot = Point((L.x + 1) * self.squareSize, (L.y + 1) * self.squareSize + self.textHeight)
+            temp = Rectangle(top,bot)
+            temp.setFill(pieceColors[0])
+            temp.draw(self.win)
+
+            #redraw the player
+            newPiece = Circle(Point((0.5 + L.x) * self.squareSize, (0.5 + L.y) * self.squareSize + self.textHeight), self.squareSize * 2 / 5)
+            newPiece.setFill(pieceColors[self.pieces[L.x][L.y]])
+            newPiece.setWidth(3)
+            newPiece.draw(self.win)
 
     #redraws a square (even if the given square isn't selected)
     def deselect(self, L):
-        if L.x < 0 or L.x >= self.boardWidth or L.y < 0 or L.y >= self.boardHeight:
-                raise Exception('invalid location: ' + str(L))
-        #recolor the background
-        top = Point(L.x * self.squareSize, L.y * self.squareSize + self.textHeight)
-        bot = Point((L.x + 1) * self.squareSize, (L.y + 1) * self.squareSize + self.textHeight)
-        temp = Rectangle(top,bot)
-        temp.setFill(squareColors[1 if (L.x + L.y) % 2 == 1 else 0])
-        temp.draw(self.win)
+        if not self.visible:
+            return
+        else:
+            if L.x < 0 or L.x >= self.boardWidth or L.y < 0 or L.y >= self.boardHeight:
+                    raise Exception('invalid location: ' + str(L))
+            #recolor the background
+            top = Point(L.x * self.squareSize, L.y * self.squareSize + self.textHeight)
+            bot = Point((L.x + 1) * self.squareSize, (L.y + 1) * self.squareSize + self.textHeight)
+            temp = Rectangle(top,bot)
+            temp.setFill(squareColors[1 if (L.x + L.y) % 2 == 1 else 0])
+            temp.draw(self.win)
 
-        #redraw the player
-        newPiece = Circle(Point((0.5 + L.x) * self.squareSize, (0.5 + L.y) * self.squareSize + self.textHeight), self.squareSize * 2 / 5)
-        newPiece.setFill(pieceColors[self.pieces[L.x][L.y]])
-        newPiece.setWidth(3)
-        newPiece.draw(self.win)
+            #redraw the player
+            newPiece = Circle(Point((0.5 + L.x) * self.squareSize, (0.5 + L.y) * self.squareSize + self.textHeight), self.squareSize * 2 / 5)
+            newPiece.setFill(pieceColors[self.pieces[L.x][L.y]])
+            newPiece.setWidth(3)
+            newPiece.draw(self.win)
 
     def removePiece(self, L):
         if self.get(L) == 0:
             return
         else:
-            #cover up where the piece was
-            top = Point(L.x * self.squareSize, L.y * self.squareSize + self.textHeight)
-            bot = Point((L.x + 1) * self.squareSize, (L.y + 1) * self.squareSize + self.textHeight)
-            temp = Rectangle(top,bot)
-            temp.setFill(squareColors[1 if (L.x + L.y) % 2 == 1 else 0]) #to keep color alternation
-            temp.draw(self.win)
+            if self.visible:
+                #cover up where the piece was
+                top = Point(L.x * self.squareSize, L.y * self.squareSize + self.textHeight)
+                bot = Point((L.x + 1) * self.squareSize, (L.y + 1) * self.squareSize + self.textHeight)
+                temp = Rectangle(top,bot)
+                temp.setFill(squareColors[1 if (L.x + L.y) % 2 == 1 else 0]) #to keep color alternation
+                temp.draw(self.win)
             self.pieces[L.x][L.y] = 0
             return
 
     #close the board
     def close(self):
-        self.win.close()
+        if self.visible:
+            self.win.close()
 
     # returns the value at location L
+    #-1 = invalid input
     # 0 = empty space
     # 1 = player 1
     # 2 = player 2
     def get(self, L):
         if L.x < 0 or L.x >= self.boardWidth or L.y < 0 or L.y >= self.boardHeight:
-            raise Exception('invalid location: ' + str(L))
+            return -1
         return self.pieces[L.x][L.y]   
+
+    def copy(self):
+        temp = board("", "", self.boardWidth, self.boardHeight,self.squareSize, visible=False)
+        p1sPieces, p2sPieces = [], []
+        for x in range (self.boardWidth):
+            for y in range (self.boardHeight):
+                if self.pieces[x][y] == 1:
+                    p1sPieces.append(Location(x,y))
+                elif self.pieces[x][y] == 2:
+                    p2sPieces.append(Location(x,y))
+        temp.playersInit(p1sPieces,p2sPieces)
+        return temp
 
     def __str__(self):
         returner = ""
         for row in self.pieces:
             returner += str(row) + '\n'
         return returner
-
 
 def main():
     myBoard = board("test", startingText="Loading...")
