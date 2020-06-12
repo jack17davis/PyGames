@@ -25,52 +25,52 @@ def verticalcheckers(playercode, boardSize = 6, p1file = "default_player", p2fil
             p2sPieces.append(Location(x,boardHeight-y-1))
             scores[0] += 1 #score[0] is our max score
     brd.playersInit(p1sPieces, p2sPieces)
-    player = 2 #player 1 starts first
+    currPlayer = 2 #player 2 starts first
 
     if playercode == 1: #human vs human
         while True:
-            _humanTurn(brd, player)
+            _humanTurn(brd, currPlayer)
             text = _updateText(brd,text, scores)
             if len(text) < 3:
                 return int(text) #let the caller know who won for score keeping purposes
-            player = 2 - player + 1 #switch turns
+            currPlayer = 2 - currPlayer + 1 #switch turns
     
     if playercode == 2: #human vs computer
         while True:
-            _humanTurn(brd, player)
+            _humanTurn(brd, currPlayer)
 
             #update board and switch turns
             text = _updateText(brd, text, scores)
             if len(text) < 3:
                 return int(text) #let the caller know who won for score keeping purposes
-            player = 2 - player + 1 #switch turns
+            currPlayer = 2 - currPlayer + 1 #switch turns
 
-            _computerTurn(brd,player)
+            _computerTurn(brd,currPlayer)
 
             #update board and switch turns
             text = _updateText(brd, text, scores)
             if len(text) < 3:
                 return int(text) #let the caller know who won for score keeping purposes
-            player = 2 - player + 1 #switch turns
+            currPlayer = 2 - currPlayer + 1 #switch turns
     
     if playercode == 3: #computer vs computer
 
         while True:
-            _computerTurn(brd, player, p1file)
+            _computerTurn(brd, currPlayer, p1file)
 
             #update board and switch turns
             text = _updateText(brd, text, scores)
             if len(text) < 3:
                 return int(text) #let the caller know who won for score keeping purposes
-            player = 2 - player + 1 #switch turns
+            currPlayer = 2 - currPlayer + 1 #switch turns
 
-            _computerTurn(brd, player, p2file)
+            _computerTurn(brd, currPlayer, p2file)
 
             #update board and switch turns
             text = _updateText(brd, text, scores)
             if len(text) < 3:
                 return int(text) #let the caller know who won for score keeping purposes
-            player = 2 - player + 1 #switch turns
+            currPlayer = 2 - currPlayer + 1 #switch turns
         
         brd.close()
         return 1
@@ -185,7 +185,7 @@ def _humanTurn(brd, playerToMove):
 
     while True: #loop infinitely until the user makes an acceptable move
         click = brd.getClickedSquare()
-        print("[Human Player] Selected Location: " + str(click))
+        #print("[Human Player] Selected Location: " + str(click))
         if startSelected: #we have a complete move
             if _isvalid(brd, playerToMove, start, click):
                 break # we now have an acceptable move
@@ -202,4 +202,4 @@ def _humanTurn(brd, playerToMove):
     time.sleep(0.22) #slight delay for better visuals
 
 if __name__ == "__main__":
-    verticalcheckers(3,6)
+    verticalcheckers(2,6)

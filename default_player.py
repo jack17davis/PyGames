@@ -15,15 +15,15 @@ def getMoveOptions(brd,playerToMove):
     moveList = []
     for i in range (brd.boardWidth):
         for j in range (brd.boardHeight):
-            print("checking location: " + str(Location(i,j)))
+            #print("checking location: " + str(Location(i,j)))
             if playerToMove == brd.get(Location(i,j)): #check every location on the board for a piece that this player owns
-                print("\t One of our pieces has been found!")
+                #print("\t One of our pieces has been found!")
                 if brd.get(Location(i - 1, j)) == 0: #the piece can move to the left
-                    print("\t\t it can move to the left. Adding move option " + str(Location(i,j)) + "->" + str(Location(i-1,j)))
+                    #print("\t\t it can move to the left. Adding move option " + str(Location(i,j)) + "->" + str(Location(i-1,j)))
                     moveList.append((Location(i, j),Location(i - 1, j)))
  
                 if brd.get(Location(i + 1, j)) == 0: #the piece can move to the right
-                    print("\t\t it can move to the right. Adding move option " + str(Location(i,j)) + "->" + str(Location(i+1,j)))
+                    #print("\t\t it can move to the right. Adding move option " + str(Location(i,j)) + "->" + str(Location(i+1,j)))
                     moveList.append((Location(i, j),Location(i + 1, j)))
 
                 Lstart = Location(i,j)
@@ -33,7 +33,7 @@ def getMoveOptions(brd,playerToMove):
 
                 #check directly in front of the piece
                 if brd.get(Location(Lstart.x, Lstart.y + 1 * dir)) == 0:
-                    print("\t\t it can move forward. Adding move option " + str(Location(i,j)) + "->" + str(Location(Lstart.x, Lstart.y + 1 * dir)))
+                    #print("\t\t it can move forward. Adding move option " + str(Location(i,j)) + "->" + str(Location(Lstart.x, Lstart.y + 1 * dir)))
                     moveList.append((Lstart,Location(Lstart.x, Lstart.y + 1 * dir)))
 
                 for jmp in range (1, dist + 1): #check every space that's part of the jump
@@ -42,7 +42,7 @@ def getMoveOptions(brd,playerToMove):
                     if jmp % 2 == 0 and brd.get(Location(Lstart.x, Lstart.y + jmp * dir)) != 0: #if there's a piece in the way a multi-jump isn't possible
                         break
                     if jmp % 2 == 0 and brd.get(Location(Lstart.x, Lstart.y + jmp * dir)) == 0: #if there's an open space we could jump there
-                        print("\t\t it can jump " + str(jmp) + " spaces forward. Adding move option " + str(Location(i,j)) + "->" + str(Location(Lstart.x, Lstart.y + jmp * dir)))
+                        #print("\t\t it can jump " + str(jmp) + " spaces forward. Adding move option " + str(Location(i,j)) + "->" + str(Location(Lstart.x, Lstart.y + jmp * dir)))
                         moveList.append((Lstart,Location(Lstart.x, Lstart.y + jmp * dir)))
     
     return moveList
@@ -75,15 +75,14 @@ def getMove(brd, playerToMove, givenTimeLimit):
     bestMoveSoFar = moveList[0]
 
     for move in moveList: #evaluate each state 1 move away
-        #commented out while debugging
         projectedState = makeMove(brd, playerToMove, move)
-        #scoreList.append(getScore(projectedState))
+        scoreList.append(getScore(projectedState))
     
-        temp = getScore(projectedState)
-        scoreList.append(temp)
-
-        (L1,L2) = move
-        print("possible move(" + str(temp) + "): " + str(L1) + "->" + str(L2))
+        #may be useful for debugging
+        #temp = getScore(projectedState)
+        #scoreList.append(temp)
+        #(L1,L2) = move
+        #print("possible move(" + str(temp) + "): " + str(L1) + "->" + str(L2))
 
         if outOfTime(): #default in case we run out of time
             return bestMoveSoFar
