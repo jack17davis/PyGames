@@ -1,3 +1,4 @@
+import sys
 from board import *
 from datetime import datetime
 import time
@@ -8,9 +9,6 @@ boardHeight = 6
 timeLimit = 3.0
 
 def verticalcheckers(playercode, boardSize = 6, p1file = "default_player", p2file = "default_player"):
-    if playercode == 0: #0 = quit
-        return
-
     #initialize the game
     text = "Player 1 = 0\t Player 2 = 0"
     scores = [0, 0, 0]
@@ -27,7 +25,7 @@ def verticalcheckers(playercode, boardSize = 6, p1file = "default_player", p2fil
     brd.playersInit(p1sPieces, p2sPieces)
     currPlayer = 2 #player 2 starts first
 
-    if playercode == 1: #human vs human
+    if playercode == 0: #human vs human
         while True:
             _humanTurn(brd, currPlayer)
             text = _updateText(brd,text, scores)
@@ -35,7 +33,7 @@ def verticalcheckers(playercode, boardSize = 6, p1file = "default_player", p2fil
                 return int(text) #let the caller know who won for score keeping purposes
             currPlayer = 2 - currPlayer + 1 #switch turns
     
-    if playercode == 2: #human vs computer
+    if playercode == 1: #human vs computer
         while True:
             _humanTurn(brd, currPlayer)
 
@@ -53,7 +51,7 @@ def verticalcheckers(playercode, boardSize = 6, p1file = "default_player", p2fil
                 return int(text) #let the caller know who won for score keeping purposes
             currPlayer = 2 - currPlayer + 1 #switch turns
     
-    if playercode == 3: #computer vs computer
+    if playercode == 2: #computer vs computer
 
         while True:
             _computerTurn(brd, currPlayer, p1file)
@@ -202,4 +200,5 @@ def _humanTurn(brd, playerToMove):
     time.sleep(0.22) #slight delay for better visuals
 
 if __name__ == "__main__":
+    sys.path.insert(1, '../Util')
     verticalcheckers(2,6)
