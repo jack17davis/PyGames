@@ -82,19 +82,19 @@ def verticalcheckers(playercode, boardSize = 6, p1file = "default_player", p2fil
 #if a player has won return a string with the player who has won (1 or 2)
 def _updateText(brd,text,scores):
     for i in range (boardWidth):
-        if brd.get((i,0)) == 2: #player 2 has scored a point
+        if brd.get(i,0) == 2: #player 2 has scored a point
             scores[2] += 1
             if scores[2] < scores[0]: #but they haven't won yet
-                brd.removePiece((i,0))
+                brd.removePiece(i,0)
             else: #player 2 has won
                 brd.setText("Player 2 has won")
                 time.sleep(1)
                 brd.close()
                 return "2" #used to denote end of game
-        if brd.get((i, boardWidth - 1)) == 1: #player 1 has scored a point
+        if brd.get(i, boardWidth - 1) == 1: #player 1 has scored a point
             scores[1] +=  1
             if scores[1] < scores[0]: #but they haven't won yet
-                brd.removePiece((i, boardWidth - 1))
+                brd.removePiece(i, boardWidth - 1)
             else: #player 1 has won
                 brd.setText("Player 1 has won")
                 time.sleep(2)
@@ -108,7 +108,7 @@ def _updateText(brd,text,scores):
 def _isvalid(brd, playerToMove, Lstart, Lend):
     if (Lstart[0] < 0 or Lstart[0] >= brd.boardWidth or Lstart[1] < 0 or Lstart[1] >= brd.boardHeight or #make sure Lstart is in bounds
     Lend[0] < 0 or Lend[0] >= brd.boardWidth or Lend[1] < 0 or Lend[1] >= brd.boardHeight or #make sure Lend is in bounds
-    playerToMove != brd.get(Lstart) or Lstart == Lend or brd.get(Lend) != 0):
+    playerToMove != brd.get(Lstart[0], Lstart[1]) or Lstart == Lend or brd.get(Lend[0],Lend[1]) != 0):
         return False
 
     #list of potential valid moves
@@ -127,9 +127,9 @@ def _isvalid(brd, playerToMove, Lstart, Lend):
         dir = 1 if playerToMove == 1 else -1 #allows us to use the same code for player 1 and player 2
 
         for i in range (1, dist): #check every space that's part of the jump
-            if i % 2 == 1 and brd.get((Lstart[0], Lstart[1] + i * dir)) == 0: #there isn't a piece to jump over
+            if i % 2 == 1 and brd.get(Lstart[0], Lstart[1] + i * dir) == 0: #there isn't a piece to jump over
                 return False
-            if i % 2 == 0 and brd.get((Lstart[0], Lstart[1] + i * dir)) != 0: #if there's a piece in the way a multi-jump isn't possible
+            if i % 2 == 0 and brd.get(Lstart[0], Lstart[1] + i * dir) != 0: #if there's a piece in the way a multi-jump isn't possible
                 return False
         return True
 
@@ -153,7 +153,7 @@ def _computerTurn(brd, playerToMove, filename = "default_player"):
     
     #check validity of move
     if _isvalid(brd, playerToMove, x, y): #the computer's move is acceptable
-        brd.makeMove(playerToMove, x, y)
+        brd.makeMove(x, y)
         time.sleep(0.22) #slight delay for better visuals
         return
     else:
@@ -168,10 +168,10 @@ def _makeDefaultMove(brd, playerToMove):
     directions = [[1,0,], [-1,0], [0,1], [0,-1]]
     for i in range (brd.boardWidth):
         for j in range (brd.boardHeight):
-            if playerToMove == brd.get((i,j)): #check every location on the board for a piece that this player owns
+            if playerToMove == brd.get(i,j): #check every location on the board for a piece that this player owns
                 for direction in directions: #when we find one, find a direction it can move
                     if _isvalid(brd,playerToMove, (i, j), (i + direction[0], j + direction[1])):
-                        brd.makeMove(playerToMove, (i, j), (i + direction[0], j + direction[1]))
+                        brd.makeMove((i, j), (i + direction[0], j + direction[1]))
                         return
     #no possible move was found
     print("Error: _makeDefaultMove couldn't find any possible moves!!!") #hopefully this never happens
@@ -189,15 +189,15 @@ def _humanTurn(brd, playerToMove):
             if _isvalid(brd, playerToMove, start, click):
                 break # we now have an acceptable move
             else:
-                brd.deselect(start)
+                brd.deselect(start[0], start[1])
                 startSelected = False
         else: # this is the first piece
-            if brd.get(click) == 0: #if there's no piece here
+            if brd.get(click[0], click[1]) == 0: #if there's no piece here
                 continue
-            brd.select(click)
+            brd.select(click[0], click[1])
             start = click
             startSelected = True
-    brd.makeMove(playerToMove, start, click)
+    brd.makeMove(start, click)  
     time.sleep(0.22) #slight delay for better visuals
 
 if __name__ == "__main__":

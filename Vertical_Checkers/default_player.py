@@ -16,13 +16,13 @@ def getMoveOptions(brd,playerToMove):
     for i in range (brd.boardWidth):
         for j in range (brd.boardHeight):
             #print("checking location: " + str(Location(i,j)))
-            if playerToMove == brd.get((i,j)): #check every location on the board for a piece that this player owns
+            if playerToMove == brd.get(i,j): #check every location on the board for a piece that this player owns
                 #print("\t One of our pieces has been found!")
-                if brd.get((i - 1, j)) == 0: #the piece can move to the left
+                if brd.get(i - 1, j) == 0: #the piece can move to the left
                     #print("\t\t it can move to the left. Adding move option " + str(Location(i,j)) + "->" + str(Location(i-1,j)))
                     moveList.append(((i, j),(i - 1, j)))
  
-                if brd.get((i + 1, j)) == 0: #the piece can move to the right
+                if brd.get(i + 1, j) == 0: #the piece can move to the right
                     #print("\t\t it can move to the right. Adding move option " + str(Location(i,j)) + "->" + str(Location(i+1,j)))
                     moveList.append(((i, j),(i + 1, j)))
 
@@ -32,16 +32,16 @@ def getMoveOptions(brd,playerToMove):
                 dir = 1 if playerToMove == 1 else -1 #allows us to use the same code for player 1 and player 2
 
                 #check directly in front of the piece
-                if brd.get((Lstart[0], Lstart[1] + 1 * dir)) == 0:
+                if brd.get(Lstart[0], Lstart[1] + 1 * dir) == 0:
                     #print("\t\t it can move forward. Adding move option " + str(Location(i,j)) + "->" + str(Location(Lstart[0], Lstart[1] + 1 * dir)))
                     moveList.append((Lstart,(Lstart[0], Lstart[1] + 1 * dir)))
 
                 for jmp in range (1, dist + 1): #check every space that's part of the jump
-                    if jmp % 2 == 1 and brd.get((Lstart[0], Lstart[1] + jmp * dir)) == 0: #there isn't a piece to jump over
+                    if jmp % 2 == 1 and brd.get(Lstart[0], Lstart[1] + jmp * dir) == 0: #there isn't a piece to jump over
                         break
-                    if jmp % 2 == 0 and brd.get((Lstart[0], Lstart[1] + jmp * dir)) != 0: #if there's a piece in the way a multi-jump isn't possible
+                    if jmp % 2 == 0 and brd.get(Lstart[0], Lstart[1] + jmp * dir) != 0: #if there's a piece in the way a multi-jump isn't possible
                         break
-                    if jmp % 2 == 0 and brd.get((Lstart[0], Lstart[1] + jmp * dir)) == 0: #if there's an open space we could jump there
+                    if jmp % 2 == 0 and brd.get(Lstart[0], Lstart[1] + jmp * dir) == 0: #if there's an open space we could jump there
                         #print("\t\t it can jump " + str(jmp) + " spaces forward. Adding move option " + str(Location(i,j)) + "->" + str(Location(Lstart[0], Lstart[1] + jmp * dir)))
                         moveList.append((Lstart,(Lstart[0], Lstart[1] + jmp * dir)))
     
@@ -50,16 +50,16 @@ def getMoveOptions(brd,playerToMove):
 def makeMove(brd, playerToMove, move):
     (L1,L2) = move
     temp = brd.copy()
-    temp.makeMove(playerToMove, L1,L2)
+    temp.makeMove(L1, L2)
     return temp
 
 def getScore(brd):
     sum = 0
     for i in range (brd.boardWidth):
         for j in range (brd.boardHeight):
-            if brd.get((i,j)) == 1: #we've found one of player 1's pieces
+            if brd.get(i,j) == 1: #we've found one of player 1's pieces
                 sum -= distance((i,j),(i, brd.boardHeight-1))
-            elif brd.get((i,j)) == 2: #we've found one of player 2's pieces
+            elif brd.get(i,j) == 2: #we've found one of player 2's pieces
                 sum += distance((i,j),(i,0))
     return sum
 
