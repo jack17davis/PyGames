@@ -1,4 +1,5 @@
 import sys
+sys.path.insert(1, '../Util')
 from board import *
 from datetime import datetime
 import time
@@ -19,8 +20,8 @@ def verticalcheckers(playercode, boardSize = 6, p1file = "default_player", p2fil
     p1sPieces, p2sPieces = [], []
     for x in range (boardWidth):
         for y in range (int(boardHeight/3)):
-            p1sPieces.append(Location(x,y))
-            p2sPieces.append(Location(x,boardHeight-y-1))
+            p1sPieces.append((x,y))
+            p2sPieces.append((x,boardHeight-y-1))
             scores[0] += 1 #score[0] is our max score
     brd.playersInit(p1sPieces, p2sPieces)
     currPlayer = 2 #player 2 starts first
@@ -81,19 +82,19 @@ def verticalcheckers(playercode, boardSize = 6, p1file = "default_player", p2fil
 #if a player has won return a string with the player who has won (1 or 2)
 def _updateText(brd,text,scores):
     for i in range (boardWidth):
-        if brd.get(Location(i,0)) == 2: #player 2 has scored a point
+        if brd.get((i,0)) == 2: #player 2 has scored a point
             scores[2] += 1
             if scores[2] < scores[0]: #but they haven't won yet
-                brd.removePiece(Location(i,0))
+                brd.removePiece((i,0))
             else: #player 2 has won
                 brd.setText("Player 2 has won")
                 time.sleep(1)
                 brd.close()
                 return "2" #used to denote end of game
-        if brd.get(Location(i, boardWidth - 1)) == 1: #player 1 has scored a point
+        if brd.get((i, boardWidth - 1)) == 1: #player 1 has scored a point
             scores[1] +=  1
             if scores[1] < scores[0]: #but they haven't won yet
-                brd.removePiece(Location(i, boardWidth - 1))
+                brd.removePiece((i, boardWidth - 1))
             else: #player 1 has won
                 brd.setText("Player 1 has won")
                 time.sleep(2)
@@ -105,30 +106,30 @@ def _updateText(brd,text,scores):
 
 #checks whether a given player's move is valid or not          
 def _isvalid(brd, playerToMove, Lstart, Lend):
-    if (Lstart.x < 0 or Lstart.x >= brd.boardWidth or Lstart.y < 0 or Lstart.y >= brd.boardHeight or #make sure Lstart is in bounds
-    Lend.x < 0 or Lend.x >= brd.boardWidth or Lend.y < 0 or Lend.y >= brd.boardHeight or #make sure Lend is in bounds
+    if (Lstart[0] < 0 or Lstart[0] >= brd.boardWidth or Lstart[1] < 0 or Lstart[1] >= brd.boardHeight or #make sure Lstart is in bounds
+    Lend[0] < 0 or Lend[0] >= brd.boardWidth or Lend[1] < 0 or Lend[1] >= brd.boardHeight or #make sure Lend is in bounds
     playerToMove != brd.get(Lstart) or Lstart == Lend or brd.get(Lend) != 0):
         return False
 
     #list of potential valid moves
     
     #shift to left or right
-    elif (Lstart.x + 1 == Lend.x and Lstart.y == Lend.y) or (Lstart.x - 1 == Lend.x and Lstart.y == Lend.y):
+    elif (Lstart[0] + 1 == Lend[0] and Lstart[1] == Lend[1]) or (Lstart[0] - 1 == Lend[0] and Lstart[1] == Lend[1]):
         return True
 
     #shift towards opponents goal
-    elif (Lstart.x == Lend.x and Lstart.y + 1 == Lend.y and playerToMove == 1) or (Lstart.x == Lend.x and Lstart.y - 1 == Lend.y and playerToMove == 2): 
+    elif (Lstart[0] == Lend[0] and Lstart[1] + 1 == Lend[1] and playerToMove == 1) or (Lstart[0] == Lend[0] and Lstart[1] - 1 == Lend[1] and playerToMove == 2): 
         return True
 
     #jumps
-    elif Lstart.x == Lend.x and abs(Lend.y - Lstart.y) % 2 == 0: #positions are in the same column and an even number of positions away
-        dist = abs(Lend.y - Lstart.y)
+    elif Lstart[0] == Lend[0] and abs(Lend[1] - Lstart[1]) % 2 == 0: #positions are in the same column and an even number of positions away
+        dist = abs(Lend[1] - Lstart[1])
         dir = 1 if playerToMove == 1 else -1 #allows us to use the same code for player 1 and player 2
 
         for i in range (1, dist): #check every space that's part of the jump
-            if i % 2 == 1 and brd.get(Location(Lstart.x, Lstart.y + i * dir)) == 0: #there isn't a piece to jump over
+            if i % 2 == 1 and brd.get((Lstart[0], Lstart[1] + i * dir)) == 0: #there isn't a piece to jump over
                 return False
-            if i % 2 == 0 and brd.get(Location(Lstart.x, Lstart.y + i * dir)) != 0: #if there's a piece in the way a multi-jump isn't possible
+            if i % 2 == 0 and brd.get((Lstart[0], Lstart[1] + i * dir)) != 0: #if there's a piece in the way a multi-jump isn't possible
                 return False
         return True
 
@@ -167,10 +168,10 @@ def _makeDefaultMove(brd, playerToMove):
     directions = [[1,0,], [-1,0], [0,1], [0,-1]]
     for i in range (brd.boardWidth):
         for j in range (brd.boardHeight):
-            if playerToMove == brd.get(Location(i,j)): #check every location on the board for a piece that this player owns
+            if playerToMove == brd.get((i,j)): #check every location on the board for a piece that this player owns
                 for direction in directions: #when we find one, find a direction it can move
-                    if _isvalid(brd,playerToMove, Location(i, j), Location(i + direction[0], j + direction[1])):
-                        brd.makeMove(playerToMove, Location(i, j), Location(i + direction[0], j + direction[1]))
+                    if _isvalid(brd,playerToMove, (i, j), (i + direction[0], j + direction[1])):
+                        brd.makeMove(playerToMove, (i, j), (i + direction[0], j + direction[1]))
                         return
     #no possible move was found
     print("Error: _makeDefaultMove couldn't find any possible moves!!!") #hopefully this never happens
@@ -179,7 +180,7 @@ def _makeDefaultMove(brd, playerToMove):
 #reads and interprets user's mouse input
 def _humanTurn(brd, playerToMove):
     startSelected = False
-    start, click = Location(0,0), Location(0,0)
+    start, click = (0,0), (0,0)
 
     while True: #loop infinitely until the user makes an acceptable move
         click = brd.getClickedSquare()
@@ -200,5 +201,4 @@ def _humanTurn(brd, playerToMove):
     time.sleep(0.22) #slight delay for better visuals
 
 if __name__ == "__main__":
-    sys.path.insert(1, '../Util')
     verticalcheckers(2,6)

@@ -4,25 +4,8 @@ import time
 pieceColors = [color_rgb(240 ,240,0),color_rgb(50, 50, 250), color_rgb(230, 50, 50)]
 squareColors = [color_rgb(127, 0, 0), color_rgb(255, 255, 255)]
 
-class Location:
-    def __init__(self,x,y):
-        self.x = x
-        self.y = y
-
-    def __eq__(self, other):
-        #print(str(self) + "Location Equals? " + str(other))
-        if other == None:
-            return False
-        return self.x == other.x and self.y == other.y
-
-    def __ne__(self, other):
-        return not self == other
-
-    def distTo(self,other):
-        return abs(self.x - other.x) + abs(self.y - other.y)
-
-    def __str__(self):
-        return "(" + str(self.x) + "," + str(self.y) + ")"
+def distance(a,b):
+    return abs(a[0] - b[0]) + abs(a[1] - b[1])
 
 class board:
     
@@ -56,36 +39,36 @@ class board:
                 #time.sleep(1)
 
     #clear board and add players at the given locations
-    #expects arrays of Location objects
+    #expects arrays of pairs
     def playersInit(self, p1sPieces, p2sPieces):
         self.clearBoard() # remove all existing pieces
 
         #add all of player one's pieces to the board
         for piece in p1sPieces:
-            if piece.x < 0 or piece.x >= self.boardWidth or piece.y < 0 or piece.y >= self.boardHeight:
+            if piece[0] < 0 or piece[0] >= self.boardWidth or piece[1] < 0 or piece[1] >= self.boardHeight:
                 raise Exception('invalid piece: ' + str(piece))
-            elif self.pieces[piece.x][piece.y] != 0: #if there's already a piece here
+            elif self.pieces[piece[0]][piece[1]] != 0: #if there's already a piece here
                 raise Exception('At least two pieces at: ' + str(piece))
             else:
                 #player 1 has a piece here so draw it
-                self.pieces[piece.x][piece.y] = 1
+                self.pieces[piece[0]][piece[1]] = 1
                 if self.visible:
-                    newPiece = Circle(Point((0.5 + piece.x) * self.squareSize, (0.5 + piece.y) * self.squareSize + self.textHeight), self.squareSize * 2 / 5)
+                    newPiece = Circle(Point((0.5 + piece[0]) * self.squareSize, (0.5 + piece[1]) * self.squareSize + self.textHeight), self.squareSize * 2 / 5)
                     newPiece.setFill(pieceColors[1])
                     newPiece.setWidth(3)
                     newPiece.draw(self.win)
 
         #add all of player two's pieces to the board
         for piece in p2sPieces:
-            if piece.x < 0 or piece.x >= self.boardWidth or piece.y < 0 or piece.y >= self.boardHeight:
+            if piece[0] < 0 or piece[0] >= self.boardWidth or piece[1] < 0 or piece[1] >= self.boardHeight:
                 raise Exception('invalid piece: ' + str(piece))
-            elif self.pieces[piece.x][piece.y] != 0: #if there's already a piece here
+            elif self.pieces[piece[0]][piece[1]] != 0: #if there's already a piece here
                 raise Exception('At least two pieces at: ' + str(piece))
             else:
                 #player 1 has a piece here so draw it
-                self.pieces[piece.x][piece.y] = 2
+                self.pieces[piece[0]][piece[1]] = 2
                 if self.visible:
-                    newPiece = Circle(Point((0.5 + piece.x) * self.squareSize, (0.5 + piece.y) * self.squareSize + self.textHeight), self.squareSize * 2 / 5)
+                    newPiece = Circle(Point((0.5 + piece[0]) * self.squareSize, (0.5 + piece[1]) * self.squareSize + self.textHeight), self.squareSize * 2 / 5)
                     newPiece.setFill(pieceColors[2])
                     newPiece.setWidth(3)
                     newPiece.draw(self.win)
@@ -95,28 +78,28 @@ class board:
         #corner cases
         if player <= 0 or player > 2:
             raise Exception(str(player) + ' is an invalid player')
-        elif L1.x < 0 or L1.x >= self.boardWidth or L1.y < 0 or L1.y >= self.boardHeight:
+        elif L1[0] < 0 or L1[0] >= self.boardWidth or L1[1] < 0 or L1[1] >= self.boardHeight:
             raise Exception('invalid starting location: ' + str(L1))
-        elif self.pieces[L1.x][L1.y] != player:
-            raise Exception('Player ' + str(player) + " is not allowed to move the piece at " + str(L1) + ". It is owned by player "+ str(self.pieces[L1.x][L1.y]))
-        elif L2.x < 0 or L2.x >= self.boardWidth or L2.y < 0 or L2.y >= self.boardHeight or self.pieces[L2.x][L2.y] != 0:
+        elif self.pieces[L1[0]][L1[1]] != player:
+            raise Exception('Player ' + str(player) + " is not allowed to move the piece at " + str(L1) + ". It is owned by player "+ str(self.pieces[L1[0]][L1[1]]))
+        elif L2[0] < 0 or L2[0] >= self.boardWidth or L2[1] < 0 or L2[1] >= self.boardHeight or self.pieces[L2[0]][L2[1]] != 0:
             raise Exception('invalid ending location: ' + str(L1))
         else: #move is okay
             #update internal pieces
-            self.pieces[L1.x][L1.y] = 0
-            self.pieces[L2.x][L2.y] = player
+            self.pieces[L1[0]][L1[1]] = 0
+            self.pieces[L2[0]][L2[1]] = player
 
             if self.visible:
 
                 #cover up where the piece was
-                top = Point(L1.x * self.squareSize, L1.y * self.squareSize + self.textHeight)
-                bot = Point((L1.x + 1) * self.squareSize, (L1.y + 1) * self.squareSize + self.textHeight)
+                top = Point(L1[0] * self.squareSize, L1[1] * self.squareSize + self.textHeight)
+                bot = Point((L1[0] + 1) * self.squareSize, (L1[1] + 1) * self.squareSize + self.textHeight)
                 temp = Rectangle(top,bot)
-                temp.setFill(squareColors[1 if (L1.x + L1.y) % 2 == 1 else 0]) #to keep color alternation
+                temp.setFill(squareColors[1 if (L1[0] + L1[1]) % 2 == 1 else 0]) #to keep color alternation
                 temp.draw(self.win)
 
                 #add the piece in its new location
-                newPiece = Circle(Point((0.5 + L2.x) * self.squareSize, (0.5 + L2.y) * self.squareSize + self.textHeight), self.squareSize * 2 / 5)
+                newPiece = Circle(Point((0.5 + L2[0]) * self.squareSize, (0.5 + L2[1]) * self.squareSize + self.textHeight), self.squareSize * 2 / 5)
                 newPiece.setFill(pieceColors[player])
                 newPiece.setWidth(3)
                 newPiece.draw(self.win)
@@ -137,7 +120,7 @@ class board:
         if self.visible:
             self.text.setText(text)
 
-    #returns the location object of the tile the user has clicked on
+    #returns the location of the tile the user has clicked on
     def getClickedSquare(self):
         if not self.visible:
             return
@@ -147,7 +130,7 @@ class board:
                 squareX = int(clickPos.x / self.squareSize)
                 squareY = int((clickPos.y - self.textHeight) / self.squareSize)
                 if squareX >= 0 and squareX < self.boardWidth and squareY >= 0 and squareY < self.boardHeight:
-                    return Location(squareX, squareY)
+                    return (squareX, squareY)
 
     #highlights a square
     def select(self, L):
@@ -155,20 +138,20 @@ class board:
         if not self.visible:
             return
         else:
-            if L.x < 0 or L.x >= self.boardWidth or L.y < 0 or L.y >= self.boardHeight:
+            if L[0] < 0 or L[0] >= self.boardWidth or L[1] < 0 or L[1] >= self.boardHeight:
                 raise Exception('invalid location: ' + str(L))
-            elif self.pieces[L.x][L.y] != 1 and self.pieces[L.x][L.y] != 2:
+            elif self.pieces[L[0]][L[1]] != 1 and self.pieces[L[0]][L[1]] != 2:
                 raise Exception('No piece at' + str(L))
             #draw a highlighted background
-            top = Point(L.x * self.squareSize, L.y * self.squareSize + self.textHeight)
-            bot = Point((L.x + 1) * self.squareSize, (L.y + 1) * self.squareSize + self.textHeight)
+            top = Point(L[0] * self.squareSize, L[1] * self.squareSize + self.textHeight)
+            bot = Point((L[0] + 1) * self.squareSize, (L[1] + 1) * self.squareSize + self.textHeight)
             temp = Rectangle(top,bot)
             temp.setFill(pieceColors[0])
             temp.draw(self.win)
 
             #redraw the player
-            newPiece = Circle(Point((0.5 + L.x) * self.squareSize, (0.5 + L.y) * self.squareSize + self.textHeight), self.squareSize * 2 / 5)
-            newPiece.setFill(pieceColors[self.pieces[L.x][L.y]])
+            newPiece = Circle(Point((0.5 + L[0]) * self.squareSize, (0.5 + L[1]) * self.squareSize + self.textHeight), self.squareSize * 2 / 5)
+            newPiece.setFill(pieceColors[self.pieces[L[0]][L[1]]])
             newPiece.setWidth(3)
             newPiece.draw(self.win)
 
@@ -177,18 +160,18 @@ class board:
         if not self.visible:
             return
         else:
-            if L.x < 0 or L.x >= self.boardWidth or L.y < 0 or L.y >= self.boardHeight:
+            if L[0] < 0 or L[0] >= self.boardWidth or L[1] < 0 or L[1] >= self.boardHeight:
                     raise Exception('invalid location: ' + str(L))
             #recolor the background
-            top = Point(L.x * self.squareSize, L.y * self.squareSize + self.textHeight)
-            bot = Point((L.x + 1) * self.squareSize, (L.y + 1) * self.squareSize + self.textHeight)
+            top = Point(L[0] * self.squareSize, L[1] * self.squareSize + self.textHeight)
+            bot = Point((L[0] + 1) * self.squareSize, (L[1] + 1) * self.squareSize + self.textHeight)
             temp = Rectangle(top,bot)
-            temp.setFill(squareColors[1 if (L.x + L.y) % 2 == 1 else 0])
+            temp.setFill(squareColors[1 if (L[0] + L[1]) % 2 == 1 else 0])
             temp.draw(self.win)
 
             #redraw the player
-            newPiece = Circle(Point((0.5 + L.x) * self.squareSize, (0.5 + L.y) * self.squareSize + self.textHeight), self.squareSize * 2 / 5)
-            newPiece.setFill(pieceColors[self.pieces[L.x][L.y]])
+            newPiece = Circle(Point((0.5 + L[0]) * self.squareSize, (0.5 + L[1]) * self.squareSize + self.textHeight), self.squareSize * 2 / 5)
+            newPiece.setFill(pieceColors[self.pieces[L[0]][L[1]]])
             newPiece.setWidth(3)
             newPiece.draw(self.win)
 
@@ -198,12 +181,12 @@ class board:
         else:
             if self.visible:
                 #cover up where the piece was
-                top = Point(L.x * self.squareSize, L.y * self.squareSize + self.textHeight)
-                bot = Point((L.x + 1) * self.squareSize, (L.y + 1) * self.squareSize + self.textHeight)
+                top = Point(L[0] * self.squareSize, L[1] * self.squareSize + self.textHeight)
+                bot = Point((L[0] + 1) * self.squareSize, (L[1] + 1) * self.squareSize + self.textHeight)
                 temp = Rectangle(top,bot)
-                temp.setFill(squareColors[1 if (L.x + L.y) % 2 == 1 else 0]) #to keep color alternation
+                temp.setFill(squareColors[1 if (L[0] + L[1]) % 2 == 1 else 0]) #to keep color alternation
                 temp.draw(self.win)
-            self.pieces[L.x][L.y] = 0
+            self.pieces[L[0]][L[1]] = 0
             return
 
     #close the board
@@ -211,15 +194,15 @@ class board:
         if self.visible:
             self.win.close()
 
-    # returns the value at location L
+    # returns the value at L
     #-1 = invalid input
     # 0 = empty space
     # 1 = player 1
     # 2 = player 2
     def get(self, L):
-        if L.x < 0 or L.x >= self.boardWidth or L.y < 0 or L.y >= self.boardHeight:
+        if L[0] < 0 or L[0] >= self.boardWidth or L[1] < 0 or L[1] >= self.boardHeight:
             return -1
-        return self.pieces[L.x][L.y]   
+        return self.pieces[L[0]][L[1]]   
 
     def copy(self):
         temp = board("", "", self.boardWidth, self.boardHeight,self.squareSize, visible=False)
@@ -227,9 +210,9 @@ class board:
         for x in range (self.boardWidth):
             for y in range (self.boardHeight):
                 if self.pieces[x][y] == 1:
-                    p1sPieces.append(Location(x,y))
+                    p1sPieces.append((x,y))
                 elif self.pieces[x][y] == 2:
-                    p2sPieces.append(Location(x,y))
+                    p2sPieces.append((x,y))
         temp.playersInit(p1sPieces,p2sPieces)
         return temp
 
@@ -241,33 +224,26 @@ class board:
 
 def main():
     myBoard = board("test", startingText="Loading...")
-    p1sPieces = [Location(0,0),Location(0,2),Location(1,1),Location(2,0)]
-    p2sPieces = [Location(7,7),Location(7,5),Location(6,6),Location(5,7)]
-    myBoard.playersInit(p1sPieces, p2sPieces)
-
-
-    print(str(Location(1,2) == Location(1,2)))
-    print(str(Location(1,3) != Location(1,2)))
-    print(str(Location(1,6) == Location(1,2)))
-    print(str(Location(1,2) != Location(1,2)))  
+    p1sPieces = [(0,0),(0,2),(1,1),(2,0)]
+    p2sPieces = [(7,7),(7,5),(6,6),(5,7)]
+    myBoard.playersInit(p1sPieces, p2sPieces) 
 
     time.sleep(1)
-    myBoard.makeMove(1,p1sPieces[0], Location(0,1))
-    myBoard.makeMove(2,p2sPieces[3], Location(6,5))
-    #myBoard.makeMove(2,myBoard.getClickedSquare(),myBoard.getClickedSquare())
-
+    myBoard.makeMove(1,p1sPieces[0], (0,1))
+    myBoard.makeMove(2,p2sPieces[3], (6,5))
+    
     print(myBoard)
 
-    myBoard.select(Location(0,2))
-    myBoard.select(Location(0,1))
-    myBoard.select(Location(6,5))
-    myBoard.select(Location(7,7))
+    myBoard.select((0,2))
+    myBoard.select((0,1))
+    myBoard.select((6,5))
+    myBoard.select((7,7))
 
     time.sleep(10)
-    myBoard.deselect(Location(0,2))
-    myBoard.deselect(Location(0,1))
-    myBoard.deselect(Location(6,5))
-    myBoard.deselect(Location(7,7))
+    myBoard.deselect((0,2))
+    myBoard.deselect((0,1))
+    myBoard.deselect((6,5))
+    myBoard.deselect((7,7))
 
     myBoard.setText("It worked!!")
     time.sleep(1)
