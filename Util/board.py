@@ -115,12 +115,16 @@ class board:
 
     #returns the location of the tile the user has clicked on
     def getClickedSquare(self):
-        while True: #wait until the user clicks
-            clickPos = self.win.getMouse()
-            squareX = int(clickPos.x / self.squareSize)
-            squareY = int((clickPos.y - self.textHeight) / self.squareSize)
-            if squareX >= 0 and squareX < self.boardWidth and squareY >= 0 and squareY < self.boardHeight:
-                return (squareX, squareY)
+        try:
+            while True: #wait until the user clicks
+                clickPos = self.win.getMouse()
+                squareX = int(clickPos.x / self.squareSize)
+                squareY = int((clickPos.y - self.textHeight) / self.squareSize)
+                if squareX >= 0 and squareX < self.boardWidth and squareY >= 0 and squareY < self.boardHeight:
+                    return (squareX, squareY)
+        except GraphicsError: #thrown whenever user hits red X
+            exit() #exit gracefully
+        
 
     #highlights a square
     def select(self, x, y):
