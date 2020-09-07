@@ -28,6 +28,8 @@ def verticalcheckers(playercode, boardSize = 6, p1file = "default_player", p2fil
 
     if playercode == 0: #human vs human
         while True:
+            if _deadlock(brd,currPlayer):
+                return 2 - currPlayer + 1 #the other play caused a deadlock
             _humanTurn(brd, currPlayer)
             text = _updateText(brd,text, scores)
             if len(text) < 3:
@@ -36,6 +38,8 @@ def verticalcheckers(playercode, boardSize = 6, p1file = "default_player", p2fil
     
     if playercode == 1: #human vs computer
         while True:
+            if _deadlock(brd,currPlayer):
+                return 2 - currPlayer + 1 #the other play caused a deadlock
             _humanTurn(brd, currPlayer)
 
             #update board and switch turns
@@ -44,6 +48,8 @@ def verticalcheckers(playercode, boardSize = 6, p1file = "default_player", p2fil
                 return int(text) #let the caller know who won for score keeping purposes
             currPlayer = 2 - currPlayer + 1 #switch turns
 
+            if _deadlock(brd,currPlayer):
+                return 2 - currPlayer + 1 #the other play caused a deadlock
             _computerTurn(brd,currPlayer)
 
             #update board and switch turns
@@ -55,6 +61,8 @@ def verticalcheckers(playercode, boardSize = 6, p1file = "default_player", p2fil
     if playercode == 2: #computer vs computer
 
         while True:
+            if _deadlock(brd,currPlayer):
+                return 2 - currPlayer + 1 #the other play caused a deadlock
             _computerTurn(brd, currPlayer, p1file)
 
             #update board and switch turns
@@ -63,6 +71,8 @@ def verticalcheckers(playercode, boardSize = 6, p1file = "default_player", p2fil
                 return int(text) #let the caller know who won for score keeping purposes
             currPlayer = 2 - currPlayer + 1 #switch turns
 
+            if _deadlock(brd,currPlayer):
+                return 2 - currPlayer + 1 #the other play caused a deadlock
             _computerTurn(brd, currPlayer, p2file)
 
             #update board and switch turns
@@ -147,7 +157,7 @@ def _computerTurn(brd, playerToMove, filename = "default_player"):
     #check time
     if duration.seconds + duration.microseconds * 1e-6 >= timeLimit + 0.2:
         print("Time violation by player " + str(playerToMove))
-        _makeDefaultMove(brd, playerToMove)
+        brd.makeMove(_findDefaultMove(brd, playerToMove))
         time.sleep(0.22) #slight delay for better visuals
         return
     
@@ -158,13 +168,13 @@ def _computerTurn(brd, playerToMove, filename = "default_player"):
         return
     else:
         print("Move violation by player " + str(playerToMove))
-        _makeDefaultMove(brd, playerToMove)
+        brd.makeMove(_findDefaultMove(brd, playerToMove))
         time.sleep(0.22) #slight delay for better visuals
         return
 
 #returns the first legal move it finds
 #note: as implemented currently it does not look for a jump
-def _makeDefaultMove(brd, playerToMove):
+def _findDefaultMove(brd, playerToMove):
     directions = [[1,0,], [-1,0], [0,1], [0,-1]]
     for i in range (brd.boardWidth):
         for j in range (brd.boardHeight):
@@ -172,11 +182,10 @@ def _makeDefaultMove(brd, playerToMove):
                 for direction in directions: #when we find one, find a direction it can move
                     if _isvalid(brd,playerToMove, (i, j), (i + direction[0], j + direction[1])):
                         #print("game controller making move " + str((i,j)) + "->" + str((i + direction[0], j + direction[1])))
-                        brd.makeMove((i, j), (i + direction[0], j + direction[1]))
-                        return
+                        return ((i, j), (i + direction[0], j + direction[1]))
     #no possible move was found
-    print("Error: _makeDefaultMove couldn't find any possible moves!!!") #hopefully this never happens
-    return
+    #print("Error: _findDefaultMove couldn't find any possible moves!!!") #hopefully this never happens
+    return None
 
 #reads and interprets user's mouse input
 def _humanTurn(brd, playerToMove):
@@ -201,5 +210,16 @@ def _humanTurn(brd, playerToMove):
     brd.makeMove(start, click)  
     time.sleep(0.22) #slight delay for better visuals
 
+#returns whether or not player playterToMove is stuck
+def _deadlock(brd, playerToMove):
+    if None != _findDefaultMove(brd,playerToMove):
+        return False
+    else: #the player has no possible moves to make
+        winner = 2 - playerToMove + 1
+        brd.setText("Player " + str(winner) + " has won")
+        time.sleep(1)
+        brd.close()
+        return True
+
 if __name__ == "__main__":
-    verticalcheckers(2,6)
+    verticalcheckers(2,8)
