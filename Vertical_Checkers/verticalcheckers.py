@@ -171,6 +171,7 @@ def _makeDefaultMove(brd, playerToMove):
             if playerToMove == brd.get(i,j): #check every location on the board for a piece that this player owns
                 for direction in directions: #when we find one, find a direction it can move
                     if _isvalid(brd,playerToMove, (i, j), (i + direction[0], j + direction[1])):
+                        #print("game controller making move " + str((i,j)) + "->" + str((i + direction[0], j + direction[1])))
                         brd.makeMove((i, j), (i + direction[0], j + direction[1]))
                         return
     #no possible move was found

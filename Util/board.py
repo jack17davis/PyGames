@@ -76,7 +76,7 @@ class board:
         elif self.pieces[L1[0]][L1[1]] == 0:
             raise Exception('No piece found at starting location: '+ str(L1))
         elif L2[0] < 0 or L2[0] >= self.boardWidth or L2[1] < 0 or L2[1] >= self.boardHeight or self.pieces[L2[0]][L2[1]] != 0:
-            raise Exception('invalid ending location: ' + str(L1))
+            raise Exception('invalid ending location: ' + str(L2))
         else: #move is okay
 
             player = self.pieces[L1[0]][L1[1]] #figure out who the piece belongs to
@@ -188,7 +188,10 @@ class board:
         return self.pieces[x][y] 
 
     def toArray(self):
-        return self.pieces
+        temp = []
+        for row in self.pieces:
+            temp += [row.copy()] #need to make a copy of each row
+        return temp
 
     def __str__(self):
         returner = ""
@@ -197,27 +200,29 @@ class board:
         return returner
 
 def main():
-    myBoard = board("testing", startingText="Loading...")
+    myBoard = board("testing", startingText="Loading...",boardWidth=4,boardHeight=4)
     p1sPieces = [(0,0),(0,2),(1,1),(2,0)]
-    p2sPieces = [(7,7),(7,5),(6,6),(5,7)]
+    p2sPieces = [(3,3),(3,2),(0,1),(2,2)]
     myBoard.playersInit(p1sPieces, p2sPieces) 
 
     time.sleep(1)
-    myBoard.makeMove(p1sPieces[0], (0,1))
-    myBoard.makeMove(p2sPieces[3], (6,5))
+    myBoard.makeMove(p1sPieces[0], (0,3))
+    myBoard.makeMove(p2sPieces[3], (2,3))
     
     print(myBoard)
 
+    myArray = myBoard.toArray()
+    myArray[0][0] = 2000
+
+    print(myBoard)
+    print(myArray)
+
     myBoard.select(0,2)
     myBoard.select(0,1)
-    myBoard.select(6,5)
-    myBoard.select(7,7)
 
     time.sleep(10)
     myBoard.deselect(0,2)
     myBoard.deselect(0,1)
-    myBoard.deselect(6,5)
-    myBoard.deselect(7,7)
 
     myBoard.setText("Test Complete")
     time.sleep(1)
